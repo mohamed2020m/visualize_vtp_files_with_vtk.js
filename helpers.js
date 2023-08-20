@@ -59,7 +59,7 @@ function loadVTPTest(objData) {
       
       // Get the materialid array from the VTP data
       // const materialidArray = vtpOutput.getCellData().getArrayByName('MaterialIds');
-      const materialidArray = vtpOutput.getCellData().getArrayByName('Label');
+      const materialidArray = vtpOutput.getCellData().getArrayByName("Label");
       
       
       // console.log(vtpOutput.getCellData())
