@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #vtk-container{
+            width: 900px;
+            height: 550px;
+        }
+    </style>
+</head>
+<body>
+    <form id="upload-form">
+        <input type="file" name="file" accept=".obj" required />
+        <button type="submit">Upload and Render</button>
+    </form>
+
+    <form id="upload-form-vtp">
+        <input type="file" id="vtp-file-input" name="vtp_file" accept=".vtp" required />
+        <button type="submit">Upload VTP file</button>
+    </form>
+
+    <div id="vtk-container"></div>
+
+    <script type="text/javascript" src="https://unpkg.com/vtk.js@8.3.3/dist/vtk.js"></script>
+    <script src="helpers.js"></script>
+
+    <script>        
+        
+        // getting vtp from backend
+        document.getElementById('upload-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            
+            console.log("Starting Segmentation...")
+            // Create a FormData object
+            const formData = new FormData(event.target);
+            // formData.append('file', new Blob(), './1.obj');
+
+            // Fetch the JSON file containing the VTP XML data
+            const response = await fetch('http://127.0.0.1:8000/api/v1/predict/alpha',{
+                method: 'POST', // Specify the HTTP method
+                body: formData
+            });
+            const jsonData = await response.json();
+
+            // Extract the VTP XML data from the JSON data
+            const objData = jsonData.prediction_file;
+            
+            // Save the VTP XML data to a temporary file
+            const blob = new Blob([objData], { type: 'text/xml' });
+            const vtpFilePath = URL.createObjectURL(blob);
+
+            loadVTPTest(vtpFilePath);
+        });
+
+        
+        // load vtp directly
+        document.getElementById('upload-form-vtp').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('vtp-file-input'); // Replace with the actual input ID
+
+            console.log("Starting Segmentation...");
+
+            const selectedFile = fileInput.files[0];
+            if (!selectedFile) {
+                console.log("No file selected.");
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                const blobData = new Blob([event.target.result], { type: 'application/octet-stream' });
+                // You can use 'blobData' for further processing, such as sending it to a server or using it in your code.
+                console.log('Blob data:', blobData);
+
+                // Save the VTP XML data to a temporary file
+                const vtpBlob = new Blob([event.target.result], { type: 'application/octet-stream' });
+                const vtpFilePath = URL.createObjectURL(vtpBlob);
+                
+                console.log(vtpBlob);
+                
+                // Load the VTP data
+                loadVTPTest(vtpFilePath);
+            };
+
+            reader.readAsArrayBuffer(selectedFile);
+
+
+        });
+    </script>
+</body>
+
+</html>
