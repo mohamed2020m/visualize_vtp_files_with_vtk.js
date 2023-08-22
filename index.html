@@ -3,43 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        #vtk-container{
-            width: 900px;
-            height: 550px;
-        }
-    </style>
+    <title>Visualize VTP Labels after Segmentation</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <form id="upload-form">
-        <input type="file" name="file" accept=".obj" required />
-        <button type="submit">Upload and Render</button>
-    </form>
+    <div class="container">
+        <div class="sideBar">
+            <form id="upload-form">
+                <div class="label">
+                    <label for="without_post_proccessing">Segmentation without Post-Processing: </label>
+                </div>
+                <div class="cnt">
+                    <div>
+                        <input type="file" id="without_post_proccessing" name="file" accept=".obj" required />
+                    </div>
+                    <button type="submit">Render</button>
+                </div>
+            </form>
+        
+            <form id="upload-form_with_post_proccessing">
+                <div class="label">
+                    <label for="with_post_proccessing">Segmentation with Post-Processing: </label>
+                </div>
+                <div class="cnt">
+                    <div>
+                        <input type="file" id="with_post_proccessing"  name="file" accept=".obj" required />
+                    </div>
+                    <button type="submit">Render with PostProcessing</button>
+                </div>
+            </form>
+        
+            <form id="upload-form-vtp">
+                <div class="label">
+                    <label for="vtp-file-input">Visualize vtp file: </label>
+                </div>
+                <div class="cnt">
+                    <div>
+                        <input type="file" id="vtp-file-input" name="vtp_file" accept=".vtp" required />
+                    </div>
+                    <button type="submit">Upload VTP file</button>
+                </div>
+            </form>
 
-    <form id="upload-form-vtp">
-        <input type="file" id="vtp-file-input" name="vtp_file" accept=".vtp" required />
-        <button type="submit">Upload VTP file</button>
-    </form>
+            <button id="resetBtn" type="button">Reset</button>
+        </div>
+        <div id="vtk-container">
+            <div class="empty_container">
+                Nothing to see at the moment
+            </div>
+        </div>
+    </div>
 
-    <div id="vtk-container"></div>
+    
 
     <script type="text/javascript" src="https://unpkg.com/vtk.js@8.3.3/dist/vtk.js"></script>
     <script src="helpers.js"></script>
 
     <script>        
         
-        // getting vtp from backend
+        // without_post_proccessing
         document.getElementById('upload-form').addEventListener('submit', async function (event) {
             event.preventDefault();
             
+            document.querySelector(".empty_container").textContent = "Waiting for Segmentation..."
+
             console.log("Starting Segmentation...")
             // Create a FormData object
             const formData = new FormData(event.target);
             // formData.append('file', new Blob(), './1.obj');
 
             // Fetch the JSON file containing the VTP XML data
-            const response = await fetch('http://127.0.0.1:8000/api/v1/predict/alpha',{
+            const response = await fetch("http://127.0.0.1:8000/api/v1/predict",{
                 method: 'POST', // Specify the HTTP method
                 body: formData
             });
@@ -52,19 +86,47 @@
             const blob = new Blob([objData], { type: 'text/xml' });
             const vtpFilePath = URL.createObjectURL(blob);
 
-            loadVTPTest(vtpFilePath);
+            loadVTPTest(vtpFilePath, "MaterialIds");
         });
 
-        
+        // with_post_proccessing
+        document.getElementById('upload-form_with_post_proccessing').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            document.querySelector(".empty_container").textContent = "Waiting for Segmentation..."
+            
+            console.log("Starting Segmentation...")
+            // Create a FormData object
+            const formData = new FormData(event.target);
+            // formData.append('file', new Blob(), './1.obj');
+
+            // Fetch the JSON file containing the VTP XML data
+            const response = await fetch("http://127.0.0.1:8000/api/v1/predict/alpha",{
+                method: 'POST', // Specify the HTTP method
+                body: formData
+            });
+            const jsonData = await response.json();
+
+            // Extract the VTP XML data from the JSON data
+            const objData = jsonData.prediction_file;
+            
+            // Save the VTP XML data to a temporary file
+            const blob = new Blob([objData], { type: 'text/xml' });
+            const vtpFilePath = URL.createObjectURL(blob);
+
+            loadVTPTest(vtpFilePath, "Label");
+        });
+
         // load vtp directly
         document.getElementById('upload-form-vtp').addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const fileInput = document.getElementById('vtp-file-input'); // Replace with the actual input ID
+            const fileInput = document.getElementById('vtp-file-input');
 
             console.log("Starting Segmentation...");
 
             const selectedFile = fileInput.files[0];
+
             if (!selectedFile) {
                 console.log("No file selected.");
                 return;
@@ -74,7 +136,6 @@
 
             reader.onload = (event) => {
                 const blobData = new Blob([event.target.result], { type: 'application/octet-stream' });
-                // You can use 'blobData' for further processing, such as sending it to a server or using it in your code.
                 console.log('Blob data:', blobData);
 
                 // Save the VTP XML data to a temporary file
@@ -84,13 +145,21 @@
                 console.log(vtpBlob);
                 
                 // Load the VTP data
-                loadVTPTest(vtpFilePath);
+                loadVTPTest(vtpFilePath, "Label");
             };
 
             reader.readAsArrayBuffer(selectedFile);
-
-
         });
+    </script>
+
+    <script>
+        let resetBtn = document.querySelector("#resetBtn");
+        resetBtn.addEventListener("click", () => {
+            let empty_container = document.createElement("div");
+            empty_container.textContent = "Nothing to see at the moment";
+            empty_container.classList.add("empty_container");
+            document.querySelector("#vtk-container").replaceWith(empty_container)
+        })
     </script>
 </body>
 

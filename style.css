@@ -1,0 +1,48 @@
+body{
+    margin: 0;
+    padding:0;
+    box-sizing: border-box;
+}
+#vtk-container{
+    width: 70%;
+    height: 100%;
+    background-color: rgb(228, 228, 228);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.empty_container{
+    display: flex;
+    justify-content: center;
+}
+
+.container{
+    height: 99.5vh;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+.sideBar{
+    height: 100%;
+    background-color: aliceblue;
+    width: 30%;
+}
+.container .sideBar form{
+    padding:6px;
+    border:1px solid #eee;
+    margin-top: 5px;
+}
+
+.container .sideBar #resetBtn{
+    display: flex;
+    margin: auto;
+    margin-top: 5px;
+}
+.container .sideBar form .cnt{
+    display: block;
+    padding:6px;   
+}
+
+.container .sideBar form .cnt button{
+    margin-top:6px;   
+}
