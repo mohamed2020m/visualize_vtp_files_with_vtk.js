@@ -46,3 +46,10 @@ body{
 .container .sideBar form .cnt button{
     margin-top:6px;   
 }
+
+.config_vtp_wrapper{
+    padding:5px;
+}
+.config_vtp{
+    display: flex;
+}

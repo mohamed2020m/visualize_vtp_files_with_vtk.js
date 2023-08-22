@@ -37,13 +37,33 @@
                 <div class="label">
                     <label for="vtp-file-input">Visualize vtp file: </label>
                 </div>
+                
                 <div class="cnt">
                     <div>
                         <input type="file" id="vtp-file-input" name="vtp_file" accept=".vtp" required />
                     </div>
+                    <div class="config_vtp_wrapper">
+                        <div>
+                            <p>The vtp file was trained with post-processing?</p>
+                        </div>
+                        <div class="config_vtp">
+                            <div>
+                                <label for="wopp">No</label>
+                                <input type="checkbox" name="" id="wopp">
+                            </div>
+                            <div>
+                                <label for="wpp">Yes</label>
+                                <input type="checkbox" name="" id="wpp">
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit">Upload VTP file</button>
                 </div>
+
             </form>
+            
+            
 
             <button id="resetBtn" type="button">Reset</button>
         </div>
@@ -101,7 +121,7 @@
             // formData.append('file', new Blob(), './1.obj');
 
             // Fetch the JSON file containing the VTP XML data
-            const response = await fetch("http://127.0.0.1:8000/api/v1/predict/alpha",{
+            const response = await fetch("http://127.0.0.1:8000/api/v1/predict/post_processing",{
                 method: 'POST', // Specify the HTTP method
                 body: formData
             });
@@ -145,7 +165,13 @@
                 console.log(vtpBlob);
                 
                 // Load the VTP data
-                loadVTPTest(vtpFilePath, "Label");
+                if(document.querySelector("#wopp").checked){
+                    loadVTPTest(vtpFilePath, "MaterialIds");
+                }else if(document.querySelector("#wpp").checked){
+                    loadVTPTest(vtpFilePath, "Label");
+                }else{
+                    alert("you need to specify wheather the vtp file was segmented with post-proccess or not?")
+                }
             };
 
             reader.readAsArrayBuffer(selectedFile);
@@ -155,10 +181,11 @@
     <script>
         let resetBtn = document.querySelector("#resetBtn");
         resetBtn.addEventListener("click", () => {
-            let empty_container = document.createElement("div");
-            empty_container.textContent = "Nothing to see at the moment";
-            empty_container.classList.add("empty_container");
-            document.querySelector("#vtk-container").replaceWith(empty_container)
+            location.reload()
+            // let empty_container = document.createElement("div");
+            // empty_container.textContent = "Nothing to see at the moment";
+            // empty_container.classList.add("empty_container");
+            // document.querySelector("#vtk-container").replaceWith(empty_container)
         })
     </script>
 </body>
